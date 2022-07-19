@@ -48,4 +48,40 @@ router.post('/', async (req, res, next) => {
     }
 });
 
+router.put('/:code', async (req, res, next) => {
+    try {
+        const { code } = req.params;
+        const { name, description } = req.body;
+        const results = await db.query(
+            `UPDATE companies
+            SET name=$1, description=$2
+            WHERE code=$3
+            RETURNING *`,
+            [name, description, code]
+        );
+        if (results.rows.length === 0) {
+            throw new ExpressError(
+                `Company with code of ${code} does not exist.`,
+                404
+            );
+        }
+        return res.send({ company: results.rows[0] });
+    } catch (err) {
+        return next(err);
+    }
+});
+
+router.delete('/:code', async (req, res, next) => {
+    try {
+        const results = await db.query(
+            `DELETE FROM companies
+            WHERE code=$1`,
+            [req.params.code]
+        );
+        return res.send({ status: 'deleted' });
+    } catch (err) {
+        return next(err);
+    }
+});
+
 module.exports = router;
