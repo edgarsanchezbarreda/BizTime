@@ -19,12 +19,14 @@ app.use(function (req, res, next) {
 
 /** general error handler */
 
-app.use((err, req, res, next) => {
-    res.status(err.status || 500);
+app.use(function (err, req, res, next) {
+    let status = err.status || 500;
 
-    return res.json({
-        error: err,
-        message: err.message,
+    return res.status(status).json({
+        error: {
+            message: err.message,
+            status: status,
+        },
     });
 });
 
